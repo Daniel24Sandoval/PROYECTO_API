@@ -1,0 +1,152 @@
+﻿@page
+@model Web_Vue.Pages.YapeServicesModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yape Services</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #6a1b9a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .category-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .category-button {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .recent-services {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            color: #333;
+        }
+
+        .service-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .service-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #00bcd4;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <div class="header">
+            <span>←</span>
+            <h1>Yapear servicios</h1>
+        </div>
+
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input v-model="valorBusqueda" placeholder="Busca una empresa" />
+            <button v-on:click="buscar">Buscar</button>
+        </div>
+
+        <div class="category-buttons">
+            <button class="category-button">Compras por Internet</button>
+            <button class="category-button">Telefonía y Cable</button>
+            <button class="category-button">Luz</button>
+        </div>
+
+        <div class="recent-services">
+            <h2>Resultados de búsqueda</h2>
+            <ul v-for="empresa in empresas" :key="empresa.idEmpresa" class="contact-list">
+                <li class="contact-item">
+                    <div class="service-item">
+                        <div class="service-icon"></div>
+                        <div>
+                            <button type="button" class="contact-button" v-on:click="seleccionarEmpresa(empresa)">
+                                <strong>{{ empresa.nombre }}</strong>
+                                <p>ID Empresa: {{ empresa.idEmpresa }}</p>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            nombreUsuario: 'Invitado',
+            userId: null,
+            empresas: [],
+            valorBusqueda: '',
+            idEmpresa: '',
+            nombre: ''
+        },
+        created() {
+            this.cargarDatosUsuario();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                const token = sessionStorage.getItem('userSessionToken');
+                const nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                const userId = sessionStorage.getItem('userId');
+                if (!token || !nombreUsuario || !userId) {
+                    window.location.href = '/login';
+                } else {
+                    this.nombreUsuario = nombreUsuario;
+                    this.userId = userId;
+                }
+            },
+            buscar: function () {
+                var url = `https://localhost:7026/api/Empresas/Listar%20Empresas%20-%20Pago%20Servicio/${encodeURIComponent(this.valorBusqueda)}`;
+                axios.get(url).then((response) => {
+                    this.empresas = response.data;
+                }, error => {
+                    console.error(error);
+                });
+            },
+            seleccionarEmpresa: function (empresa) {
+                sessionStorage.setItem('idEmpresa', empresa.idEmpresa);
+                sessionStorage.setItem('nombreEmpresa', empresa.nombre);
+                window.location.href = '/ServiceSelection';
+            }
+        }
+    });
+</script>

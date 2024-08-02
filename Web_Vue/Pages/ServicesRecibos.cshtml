@@ -1,0 +1,260 @@
+﻿@page
+@model Web_Vue.Pages.ServicesRecibosModel
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibos pendientes de</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #8e44ad;
+            
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            color: white;
+        }
+
+        .back-button, .close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .content {
+            background-color: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px;
+            height: calc(100vh - 60px);
+        }
+
+        .service-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .service-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .service-details h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .service-details p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .bill-item {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+            .bill-item.selected {
+                border-color: #2ecc71;
+            }
+
+            .bill-item p {
+                margin: 0;
+                font-size: 14px;
+            }
+
+            .bill-item .amount {
+                font-weight: bold;
+                color: #2ecc71;
+            }
+
+        .submit-button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="header">
+                <button class="back-button" v-on:click="volver">&#8592;</button>
+                <h1>Recibos pendientes de</h1>
+                <button class="close-button" v-on:click="cerrar">&#10005;</button>
+            </div>
+            <div class="content">
+                <div class="service-info">
+                    <div class="service-logo">{{ nombreEmpresa }}</div>
+                    <div class="service-details">
+                        <h2>{{ nombreEmpresa }}</h2>
+                        <p>Pago con nro DNI</p>
+                        <p>Titular: {{ titular }}</p>
+                    </div>
+                </div>
+                <h3>Selecciona un recibo</h3>
+                <div v-for="recibo in recibos" :key="recibo.idFacturaPago" :class="['bill-item', { selected: reciboSeleccionado === recibo }]" v-on:click="seleccionarRecibo(recibo)">
+                    <p>Vence:</p>
+                    <p>{{ recibo.fechaPago }} <span class="amount">S/ {{ recibo.montoAPagar }}</span></p>
+                    <p>N° recibo: {{ recibo.idFacturaPago }}</p>
+                </div>
+                <button class="submit-button" v-on:click="yapearServicio">YAPEAR SERVICIO</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                nombreEmpresa: '',
+                titular: '******************',
+                recibos: [],
+                reciboSeleccionado: null,
+                dni: '',
+                userId: ''
+            },
+            created() {
+                this.cargarDatos();
+                this.listarRecibos();
+            },
+            methods: {
+                cargarDatos() {
+                    this.nombreEmpresa = sessionStorage.getItem('nombreEmpresa');
+                    this.dni = sessionStorage.getItem('dni');
+                    this.userId = sessionStorage.getItem('userId');
+                    this.idEmpresa = sessionStorage.getItem('idEmpresa');
+                    this.nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                    const token = sessionStorage.getItem('userSessionToken');
+                    if (!token || !this.nombreUsuario || !this.userId) {
+                        window.location.href = '/login';
+                    } else {
+                        this.nombreUsuario = this.nombreUsuario;
+                        this.userId = this.userId;
+                    }
+                    console.log('Datos cargados:', {
+                        nombreEmpresa: this.nombreEmpresa,
+                        dni: this.dni,
+                        userId: this.userId,
+                        idEmpresa: this.idEmpresa,
+                        nombreUsuario: this.nombreUsuario,
+                        token: token
+                    });
+                    if (this.idEmpresa == null || this.idEmpresa == "") {
+                        alert('NO HAY PAGOS PENDIENTES.');
+                    }
+                },
+                listarRecibos() {
+                    console.log('Llamando a listarRecibos con:', {
+                        dni: this.dni,
+                        idEmpresa: this.idEmpresa
+                    });
+                    axios.get(`https://localhost:7026/api/FacturaPagoes/DeudaPorDniYEmpresa?dni=${this.dni}&idEmpresa=${this.idEmpresa}`)
+                        .then(response => {
+                            console.log('Respuesta de listarRecibos:', response.data);
+                            // Filtrar recibos que no están pagados
+                            this.recibos = response.data.filter(recibo => recibo.estado !== 'Pagado');
+                            console.log('Recibos cargados:', this.recibos);
+                        })
+                        .catch(error => {
+                            console.error('Error al listar los recibos:', error);
+                        });
+                },
+                seleccionarRecibo(recibo) {
+                    this.reciboSeleccionado = recibo;
+                    console.log('Recibo seleccionado:', this.reciboSeleccionado);
+                },
+                yapearServicio() {
+                    if (!this.reciboSeleccionado) {
+                        alert('Por favor, selecciona un recibo.');
+                        return;
+                    }
+
+                    const { idFacturaPago, montoAPagar } = this.reciboSeleccionado;
+                    const { userId, nombreUsuario } = this;
+                    const token = sessionStorage.getItem('userSessionToken');
+
+                    console.log('Llamando a yapearServicio con:', {
+                        idFacturaPago: idFacturaPago,
+                        userId: userId,
+                        montoAPagar: montoAPagar
+                    });
+
+                    axios.post(`https://localhost:7026/api/PagoServicios?idFacturaPago=${idFacturaPago}&idUsuario=${userId}&montoPagado=${montoAPagar}`, {})
+                        .then(response => {
+                            console.log('Respuesta de yapearServicio:', response);
+                            if (response.status === 201) {
+                                alert('Pago realizado con éxito.');
+                                // Guardar datos en sessionStorage para la confirmación
+                                sessionStorage.setItem('pago', JSON.stringify({ idFacturaPago, userId, montoAPagar, nombreUsuario, token }));
+                                window.location.href = '/ConfirmacionServicio';
+                            } else {
+                                alert('Error al realizar el pago. Por favor, intenta nuevamente.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al realizar el pago:', error);
+                            if (error.response && error.response.data) {
+                                if (error.response.data === 'Saldo insuficiente para realizar el pago.') {
+                                    alert('Saldo insuficiente para realizar el pago. Por favor, recarga tu cuenta.');
+                                } else {
+                                    alert(`Error al realizar el pago: ${error.response.data}`);
+                                }
+                            } else {
+                                alert('Error al realizar el pago. Por favor, intenta nuevamente.');
+                            }
+                        });
+                },
+                volver() {
+                    window.history.back();
+                },
+                cerrar() {
+                    // Guardar datos en sessionStorage para la confirmación
+                    const { userId, nombreUsuario } = this;
+                    const token = sessionStorage.getItem('userSessionToken');
+                    sessionStorage.setItem('datosUsuario', JSON.stringify({ userId, nombreUsuario, token }));
+                    window.location.href = '/';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

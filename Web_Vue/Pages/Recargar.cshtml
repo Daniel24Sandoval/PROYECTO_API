@@ -1,0 +1,198 @@
+﻿@page
+@model Web_Vue.Pages.RecargarModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recargar a Alberto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #8e44ad;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .back-button, .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .user-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .user-info h2 {
+                color: #8e44ad;
+                margin: 0;
+            }
+
+            .user-info p {
+                font-size: 18px;
+                margin: 5px 0;
+                color: #888;
+            }
+
+        .amount {
+            text-align: center;
+            font-size: 48px;
+            color: #8e44ad;
+            margin: 40px 0;
+        }
+
+        .amount-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .amount-button {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .recharge-button {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <div class="header">
+            <button class="back-button" v-on:click="volver">←</button>
+            <h1>Recargar a</h1>
+            <button class="close-button" v-on:click="cerrar">×</button>
+        </div>
+        <div class="user-info">
+            <h2>{{ nombreContacto }}</h2>
+            <p>{{ numero }}</p>
+        </div>
+        <div class="amount">
+            <input type="number" v-model="monto" placeholder="Ingrese el monto" />
+        </div>
+        <div class="amount-options">
+            <button class="amount-button" v-on:click="establecerMonto(6)">S/ 6</button>
+            <button class="amount-button" v-on:click="establecerMonto(7)">S/ 7</button>
+            <button class="amount-button" v-on:click="establecerMonto(10)">S/ 10</button>
+        </div>
+        <button class="recharge-button" v-on:click="recargar">RECARGAR</button>
+    </div>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            nombreContacto: '',
+            numero: '',
+            idUsuario: null,
+            token: null,
+            nombreUsuario: '',
+            idOperadora: null,
+            monto: 0,
+            idContacto:  null
+        },
+        created() {
+            this.cargarDatosUsuario();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                this.nombreContacto = sessionStorage.getItem('nombreContacto');
+                this.numero = sessionStorage.getItem('numero');
+                this.idUsuario = sessionStorage.getItem('userId');
+                this.token = sessionStorage.getItem('userSessionToken');
+                this.nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                this.idOperadora = sessionStorage.getItem('idOperadora');
+                this.idContacto = sessionStorage.getItem('idContacto');
+
+                console.log('Datos cargados de sessionStorage:', {
+                    nombreContacto: this.nombreContacto,
+                    numero: this.numero,
+                    idUsuario: this.idUsuario,
+                    token: this.token,
+                    nombreUsuario: this.nombreUsuario,
+                    idOperadora: this.idOperadora
+                });
+
+                if (!this.nombreContacto || !this.numero || !this.idUsuario || !this.token || !this.nombreUsuario || !this.idOperadora) {
+                    window.location.href = '/login';
+                }
+            },
+            establecerMonto(monto) {
+                this.monto = monto;
+            },
+            recargar() {
+                const recarga = {
+                    IdContacto: this.idContacto,
+                    IdUsuario: this.idUsuario,
+                    Monto: this.monto,
+                    IdOperadora: this.idOperadora
+                };
+
+                console.log('Datos de recarga:', recarga);
+
+                axios.post('https://localhost:7026/api/Recargas/Recarga', recarga, {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                }).then(response => {
+                    console.log('Respuesta de la API:', response);
+                    alert('Recarga exitosa');
+                }).catch(error => {
+                    console.error('Error en la recarga:', error.response ? error.response.data : error.message);
+                    alert('Error en la recarga');
+                });
+            },
+            volver() {
+                window.history.back();
+            },
+            cerrar() {
+                window.close();
+            }
+        }
+    });
+</script>

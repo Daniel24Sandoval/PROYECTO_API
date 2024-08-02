@@ -1,0 +1,95 @@
+ 
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.app-container {
+    max-width: 414px;
+    margin: 0 auto;
+    background-color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-bar {
+    background-color: #8e44ad;
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.back-button, .close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.contact-name {
+    font-size: 1.2em;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.amount {
+    font-size: 4em;
+    text-align: center;
+    margin: 40px 0;
+    color: #8e44ad;
+}
+
+.limit-info {
+    text-align: center;
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+
+.message-input {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    text-align: center;
+    color: #888;
+}
+
+.button-container {
+    margin-top: auto;
+    display: flex;
+    padding: 20px;
+}
+
+.button {
+    flex: 1;
+    padding: 15px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.button-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.button-primary {
+    background-color: #8e44ad;
+    color: white;
+}
+.amount-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.2em;
+    margin-top: 10px;
+    box-sizing: border-box;
+}

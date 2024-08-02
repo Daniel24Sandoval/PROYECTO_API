@@ -1,0 +1,96 @@
+﻿@page
+@model Web_Vue.Pages.ListarCRecargaModel
+@{
+}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapear - Contactos</title>
+    <link rel="stylesheet" href="~/css/Contacto.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <div class="top-bar">
+            <button class="back-button">×</button>
+            <h2>RECARGAR</h2>
+            <div style="width: 24px;"></div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab active">Contactos</div>
+        </div>
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input v-model="valorBusqueda" placeholder="Ingresa el celular o busca contacto" />
+            <button v-on:click="buscar">Buscar</button>
+        </div>
+        <ul v-for="contacto in contactos" :key="contacto.idContacto" class="contact-list">
+            <li class="contact-item">
+                <button v-on:click="yapear(contacto)" class="contact-button">
+                    <div class="contact-name">{{ contacto.nombre }}</div>
+                    <div class="contact-number">{{ contacto.numero }}</div>
+
+                </button>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            nombreUsuario: 'Invitado',
+            userId: null,
+            token: null,
+            telefono: null,
+            contactos: [],
+            valorBusqueda: ''
+        },
+        created() {
+            this.cargarDatosUsuario();
+            this.listar();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                this.token = sessionStorage.getItem('userSessionToken');
+                this.nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                this.userId = sessionStorage.getItem('userId');
+                this.telefono = sessionStorage.getItem('Telefono');
+
+                if (!this.token || !this.nombreUsuario || !this.userId || !this.telefono) {
+                    window.location.href = '/login';
+                }
+            },
+            listar: function () {
+                var url = "https://localhost:7026/api/Contactoes/ListarContactos";
+                axios.get(url).then((response) => {
+                    this.contactos = response.data;
+                }, error => {
+                    console.error(error);
+                });
+            },
+            buscar: function () {
+                var url = `https://localhost:7026/api/Contactoes/BuscarContactos?valor=${this.valorBusqueda}`;
+                axios.get(url).then((response) => {
+                    this.contactos = response.data;
+                }, error => {
+                    console.error(error);
+                });
+            },
+            yapear: function (contacto) {
+                sessionStorage.setItem('userSessionToken', this.token);
+                sessionStorage.setItem('userId', this.userId);
+                sessionStorage.setItem('nombreUsuario', this.nombreUsuario);
+                sessionStorage.setItem('Telefono', this.telefono);
+                sessionStorage.setItem('idContacto', contacto.idContacto);
+                sessionStorage.setItem('nombreContacto', contacto.nombre);
+                sessionStorage.setItem('numero', contacto.numero);
+                window.location.href = '/OperadoraRecargacshtml';
+            }
+        }
+    });
+</script>

@@ -1,0 +1,180 @@
+﻿@page
+@model Web_Vue.Pages.MenuModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+ </head>
+<body>
+    <div id="app" class="app-container">
+        <header class="top-bar">
+            <i class="fas fa-bars menu-icon"></i>
+            <span>Hola, {{ nombreUsuario }}</span>
+            <i class="fas fa-headphones headphones-icon"></i>
+            <i class="fas fa-bell bell-icon"></i>
+        </header>
+
+        <div class="promo-banner">
+            ¡4 donuts a solo S/8.90! Yapeando en Dunkin' Donuts
+        </div>
+
+        <div class="icon-grid">
+            <div class="icon-item">
+                <form method="get" action="/MenuRecar">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Recargar celular</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="icon-item">
+                <form method="get" action="/YapeServices">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Yapear servicios</span>
+                    </button>
+                </form>
+            </div>
+ 
+            <div class="icon-item">
+                <form method="get" action="/Creditos">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Créditos</span>
+                    </button>
+                </form>
+            </div><br />
+ 
+            <div class="icon-item">
+                <form method="get" action="/ListarContactos">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-tag"></i>
+                        <span>Yape</span>
+                    </button>
+                </form>
+            </div>
+            <div class="icon-item">
+                <form method="get" action="/Tienda">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-store"></i>
+                        <span>Tienda</span>
+                    </button>
+                </form>
+            </div>
+            <div class="icon-item">
+                <form method="get" action="/Entradas">
+                    <button type="submit" class="bottom-button">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Entradas</span>
+                    </button>
+                </form>
+            </div>
+ 
+        </div>
+        <div class="balance-section">
+            <button onclick="toggleBalance()" class="balance-button">Mostrar saldo</button>
+            <p id="balance" style="display: none;">S/ {{ saldo }}</p>
+        </div>
+
+        <div class="movements">
+            <h3>Movimientos</h3>
+            <div v-for="movimiento in movimientos" :key="movimiento.fecha" class="movement-item">
+                <span>{{ movimiento.nombreDestino }}</span>
+                <span :class="{ 'negative': movimiento.monto < 0 }">S/ {{ movimiento.monto }}</span>
+                <span>{{ movimiento.nombreServicio }}</span>
+            </div>
+        </div>
+
+        <div class="bottom-buttons">
+            <button class="bottom-button">
+                <i class="fas fa-qrcode"></i> Escanear QR
+            </button>
+            <form method="get" action="/ListarContactos">
+                <button type="submit" class="bottom-button">
+                    <i class="fas fa-paper-plane"></i> Yapear
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script>
+    Vue.use(VueResource);
+
+    function toggleBalance() {
+        var balanceElement = document.getElementById('balance');
+        var balanceButton = document.querySelector('.balance-button');
+        if (balanceElement.style.display === 'none') {
+            balanceElement.style.display = 'block';
+            balanceButton.textContent = 'Ocultar saldo';
+        } else {
+            balanceElement.style.display = 'none';
+            balanceButton.textContent = 'Mostrar saldo';
+        }
+    }
+
+    new Vue({
+        el: '#app',
+        data: {
+            nombreUsuario: 'Invitado',
+            userId: null,
+            saldo: null,
+            idCuenta: null,
+            Telefono: null,
+            movimientos: []
+        },
+        created() {
+            this.cargarDatosUsuario();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                const token = sessionStorage.getItem('userSessionToken');
+                const Telefono = sessionStorage.getItem('Telefono');
+                const nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                const userId = sessionStorage.getItem('userId');
+
+                if (!token || !nombreUsuario || !userId) {
+                    window.location.href = '/login';
+                } else {
+                    this.nombreUsuario = nombreUsuario;
+                    this.userId = userId;
+                    this.cargarSaldo();
+                    this.Telefono = Telefono;
+                }
+            },
+            cargarSaldo() {
+                this.$http.get(`https://localhost:7026/api/Cuentums/usuario/${this.userId}`)
+                    .then(response => {
+                        console.log("Saldo response:", response.body);
+                        this.saldo = response.body.saldo;
+                        this.idCuenta = response.body.idCuenta;
+                        console.log("Saldo:", this.saldo, "ID Cuenta:", this.idCuenta);
+                        this.cargarMovimientos();
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar el saldo:", error);
+                    });
+            },
+            cargarMovimientos() {
+                this.$http.get(`https://localhost:7026/api/Movimientoes/${this.idCuenta}/${this.userId}`)
+                    .then(response => {
+                        console.log("Movimientos response:", response.body);
+                        this.movimientos = response.body;
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar los movimientos:", error);
+                    });
+            }
+        }
+    });
+</script>

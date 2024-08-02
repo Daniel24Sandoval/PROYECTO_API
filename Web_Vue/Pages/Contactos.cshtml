@@ -1,0 +1,48 @@
+﻿@page
+@model Web_Vue.Pages.Index1Model
+@{
+} 
+<div id="app">
+    <h1>Lista de Contactos</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Número</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="contacto in contactos" :key="contacto.idContacto">
+                <td>{{ contacto.idContacto }}</td>
+                <td>{{ contacto.nombre }}</td>
+                <td>{{ contacto.numero }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.3"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            contactos: []
+        },
+        mounted: function () {
+            this.listar();
+        },
+        methods: {
+            listar: function () {
+                var url = "https://localhost:7026/api/Contactoes/ListarContactos";
+                this.$http.get(url).then( function (response) {
+                    // Asegúrate de acceder a los datos de la respuesta correctamente
+                    this.contactos = response.body;
+                }, error => {
+                    console.error(error);
+                });
+            }
+        }
+    });
+</script>

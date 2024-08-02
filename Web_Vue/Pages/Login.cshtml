@@ -1,0 +1,139 @@
+﻿@page
+@model Web_Vue.Pages.LoginModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <!-- Incluir Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #6a1b9a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .qr-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: #6a1b9a;
+            margin: 0 auto;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .key {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+
+        .help {
+            margin-top: 20px;
+            color: #00bcd4;
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+
+        </div>
+
+        <div class="qr-container">
+            <div class="qr-code"></div>
+        </div>
+
+        <h2>Ingresa tus datos</h2>
+
+        <!-- Formulario manejado por Vue.js -->
+        <form v-on:submit.prevent="login">
+            <input type="email" v-model="correo" placeholder="Correo electrónico" required style="padding: 10px; width: 80%; border-radius: 5px; margin-bottom: 10px;">
+            <input type="password" v-model="clave" placeholder="Clave" required style="padding: 10px; width: 80%; border-radius: 5px; margin-bottom: 20px;">
+            <button type="submit" style="padding: 10px; width: 85%; border-radius: 5px; background-color: #4CAF50; color: white; border: none;">Iniciar sesión</button>
+        </form>
+
+        <div class="help">¿OLVIDASTE TU CLAVE?</div>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            correo: '',
+            clave: ''
+        },
+        methods: {
+            login() {
+                fetch('https://localhost:7026/api/Usuarios/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        correo: this.correo,
+                        dniuser: parseInt(this.clave) 
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Inicio de sesión fallido');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Guardar el token de sesión en sessionStorage
+                        sessionStorage.setItem('userSessionToken', data.token); // Asegúrate de que el servidor envía un objeto con una propiedad 'token'
+                        // Además, guardar el nombre de usuario y el ID (o cualquier otro dato relevante)
+                        sessionStorage.setItem('nombreUsuario', data.nombreUsuario); // Asegúrate de que el servidor envía un objeto con una propiedad 'nombreUsuario'
+                        sessionStorage.setItem('userId', data.id); // Asegúrate de que el servidor envía un objeto con una propiedad 'userId'
+                        sessionStorage.setItem('Telefono', data.Telefono);
+                        // Redirigir al usuario a la página de menú
+                        window.location.href = '/menu'; // Ajusta '/menu' a la ruta correcta de tu aplicación
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Manejar el error de inicio de sesión aquí, por ejemplo, mostrando un mensaje al usuario
+                    });
+            }
+        }
+    });
+</script>

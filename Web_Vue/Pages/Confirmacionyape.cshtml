@@ -1,0 +1,113 @@
+﻿@page
+@model Web_Vue.Pages.ConfirmacionyapeModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yape Transaction Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #6a1b9a;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .confirmation {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 80%;
+            text-align: center;
+        }
+
+        .amount {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #6a1b9a;
+        }
+
+        .details {
+            margin-bottom: 20px;
+        }
+
+        .button {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <div class="header">
+            <span>12:30</span>
+            <span>📶</span>
+        </div>
+
+        <div class="confirmation">
+            <h2>¡Yapeaste!</h2>
+            <div class="amount">S/ {{ monto }}</div>
+            <div class="details">
+                <p>{{ nombreContacto }}</p>
+                <p>{{ fecha }}</p>
+                <p>Nro. de celular: {{ numero }}</p>
+                <p>Destino: YAPE</p>
+                <p>Nro. de operación: {{ nroOperacion }}</p>
+            </div>
+            <button class="button" v-on:click="irAInicio">Ir a inicio</button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            monto: 0,
+            nombreContacto: '',
+            fecha: '',
+            nroOperacion: '',
+            numero: '',
+            userId: '',
+            nombreUsuario: ''
+        },
+        created() {
+            this.monto = localStorage.getItem('monto');
+            this.nombreContacto = localStorage.getItem('nombreContacto');
+            this.fecha = localStorage.getItem('fecha');
+            this.nroOperacion = localStorage.getItem('nroOperacion');
+            this.numero = localStorage.getItem('numero');
+            this.userId = sessionStorage.getItem('userId');
+            this.nombreUsuario = sessionStorage.getItem('nombreUsuario');
+        },
+        methods: {
+            irAInicio() {
+                window.location.href = '/menu';
+            }
+        }
+    });
+</script>

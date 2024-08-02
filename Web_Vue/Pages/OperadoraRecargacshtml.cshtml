@@ -1,0 +1,168 @@
+﻿@page
+@model Web_Vue.Pages.OperadoraRecargacshtmlModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recargar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #8e44ad;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .back-button, .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .number {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+            .number h2 {
+                color: #8e44ad;
+                margin: 0;
+            }
+
+            .number p {
+                font-size: 18px;
+                margin: 5px 0;
+                color: #888;
+            }
+
+        .operator-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .operator-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .operator-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        .operator-name {
+            flex-grow: 1;
+        }
+
+        .promo {
+            background-color: #ffd700;
+            color: #333;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <div class="header">
+            <button class="back-button">←</button>
+            <h1>Recargar a</h1>
+            <button class="close-button">×</button>
+        </div>
+        <div class="number">
+            <h2>{{ nombreContacto }}</h2>
+            <p>{{ numero }}</p>
+        </div>
+        <h3>Elige la operadora</h3>
+        <ul class="operator-list">
+            <li class="operator-item" v-for="operadora in operadoras" :key="operadora.idOperadora" v-on:click="seleccionarOperadora(operadora)">
+                <img :src="`/api/placeholder/40/40`" :alt="operadora.nombre" class="operator-logo">
+                <span class="operator-name">{{ operadora.nombre }}</span>
+                <span class="promo" v-if="operadora.promo">{{ operadora.promo }}</span>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            nombreContacto: '',
+            numero: '',
+            idUsuario: null,
+            token: null,
+            nombreUsuario: '',
+            operadoras: []
+        },
+        created() {
+            this.cargarDatosUsuario();
+            this.listarOperadoras();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                this.nombreContacto = sessionStorage.getItem('nombreContacto');
+                this.numero = sessionStorage.getItem('numero');
+                this.idUsuario = sessionStorage.getItem('userId');
+                this.token = sessionStorage.getItem('userSessionToken');
+                this.nombreUsuario = sessionStorage.getItem('nombreUsuario');
+
+                if (!this.nombreContacto || !this.numero || !this.idUsuario || !this.token || !this.nombreUsuario) {
+                    window.location.href = '/login';
+                }
+            },
+            listarOperadoras() {
+                var url = "https://localhost:7026/api/Operadoras";
+                axios.get(url).then((response) => {
+                    this.operadoras = response.data;
+                }, error => {
+                    console.error(error);
+                });
+            },
+            seleccionarOperadora(operadora) {
+                sessionStorage.setItem('idOperadora', operadora.idOperadora);
+                sessionStorage.setItem('nombreOperadora', operadora.nombre);
+                sessionStorage.setItem('nombreContacto', this.nombreContacto);
+                sessionStorage.setItem('numero', this.numero);
+                sessionStorage.setItem('userId', this.idUsuario);
+                sessionStorage.setItem('userSessionToken', this.token);
+                sessionStorage.setItem('nombreUsuario', this.nombreUsuario);
+                window.location.href = '/Recargar';
+            }
+        }
+    });
+</script>

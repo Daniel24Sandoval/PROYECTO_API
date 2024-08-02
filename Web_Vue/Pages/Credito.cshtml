@@ -1,0 +1,133 @@
+﻿@page
+@model Web_Vue.Pages.CreditoModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen y condiciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #8e44ad;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .back-button, .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .monthly-fee {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+            .monthly-fee h2 {
+                font-size: 36px;
+                color: #8e44ad;
+                margin: 0;
+            }
+
+        .credit-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+            .credit-details h3 {
+                margin-top: 0;
+            }
+
+        .credit-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .accept-button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .terms {
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-button">←</button>
+            <h1>Resumen y condiciones</h1>
+            <button class="close-button">×</button>
+        </div>
+        <div class="monthly-fee">
+            <h2>Cuota mensual</h2>
+            <h2>S/ 97.37</h2>
+        </div>
+        <div class="credit-details">
+            <h3>Detalle de tu crédito</h3>
+            <div class="credit-item">
+                <span>Monto solicitado</span>
+                <span>S/ 1,000.00</span>
+            </div>
+            <div class="credit-item">
+                <span>Interés total</span>
+                <span>S/ 152.36</span>
+            </div>
+            <div class="credit-item">
+                <span>Monto desgravamen</span>
+                <span>S/ 16.12</span>
+            </div>
+            <div class="credit-item">
+                <span>Total al finalizar el crédito</span>
+                <span>S/ 1,168.48</span>
+            </div>
+            <div class="credit-item">
+                <strong>Cuota mensual</strong>
+                <strong>S/ 97.37</strong>
+            </div>
+        </div>
+        <button class="accept-button">Aceptar condiciones</button>
+        <p class="terms">Al pulsar "Aceptar condiciones", estoy de acuerdo con la Hoja de resumen, Contrato de crédito personal, Cronograma de pago y Seguro de desgravamen, los cuales he tenido a mi disposición.</p>
+    </div>
+</body>
+</html>

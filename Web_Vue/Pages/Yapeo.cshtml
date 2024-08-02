@@ -1,0 +1,136 @@
+﻿@page
+@model Web_Vue.Pages.YapeoModel
+@{
+ 
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapear a Contacto</title>
+    <link rel="stylesheet" href="~/css/yapeo.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <div class="top-bar">
+            <button class="back-button">‹</button>
+            <span>Yapear a</span>
+            <button class="close-button">×</button>
+        </div>
+        <div class="contact-name">{{ nombreContacto }}</div>
+        <div class="amount">
+            <input type="number" v-model.number="monto" placeholder="Monto a enviar" class="amount-input" />
+        </div>
+        <div class="limit-info">Límite por yapeo S/ 500, límite total por día S/ 2000</div>
+        <div class="message-input">Agregar mensaje</div>
+        <div class="button-container">
+            <button class="button button-secondary">OTROS BANCOS</button>
+            <button class="button button-primary" v-on:click="yapear">YAPEAR</button>
+        </div>
+        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+        <div class="debug-info">
+            <p>User ID: {{ userId }}</p>
+            <p>Nombre Usuario: {{ nombreUsuario }}</p>
+            <p>ID Contacto: {{ idContacto }}</p>
+            <p>Nombre Contacto: {{ nombreContacto }}</p>
+            <p>Monto: {{ monto }}</p>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            userId: '',
+            nombreUsuario: '',
+            numero: '',
+            idContacto: '',
+            nombreContacto: '',
+            monto: 0,
+            errorMessage: ''
+        },
+        created() {
+            this.cargarDatosUsuario();
+        },
+        methods: {
+            cargarDatosUsuario() {
+                const token = sessionStorage.getItem('userSessionToken');
+                const nombreUsuario = sessionStorage.getItem('nombreUsuario');
+                const userId = sessionStorage.getItem('userId');
+                const idContacto = sessionStorage.getItem('idContacto');
+                const nombreContacto = sessionStorage.getItem('nombreContacto');
+                const numero = sessionStorage.getItem('numero');
+
+                if (!token || !nombreUsuario || !userId || !idContacto || !nombreContacto || !numero) {
+                    window.location.href = '/login';
+                } else {
+                    this.userId = parseInt(userId);
+                    this.nombreUsuario = nombreUsuario;
+                    this.idContacto = parseInt(idContacto);
+                    this.nombreContacto = nombreContacto;
+                    this.numero = numero;
+                }
+
+                console.log('User ID:', this.userId);
+                console.log('Nombre Usuario:', this.nombreUsuario);
+                console.log('ID Contacto:', this.idContacto);
+                console.log('Nombre Contacto:', this.nombreContacto);
+            },
+            async yapear() {
+                console.log('Enviando datos:', {
+                    idUsuario: this.userId,
+                    idContacto: this.idContacto,
+                    monto: this.monto
+                });
+
+                if (!this.userId || !this.idContacto || this.monto <= 0) {
+                    this.errorMessage = 'Por favor, complete todos los campos correctamente.';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('https://localhost:7026/api/Yapeos/Yapear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'accept': 'text/plain'
+                        },
+                        body: JSON.stringify({
+                            idUsuario: this.userId,
+                            idContacto: this.idContacto,
+                            monto: this.monto
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        this.errorMessage = errorText;
+                        return;
+                    }
+
+                    const data = await response.json();
+                    alert('Yapeo realizado con éxito: ' + JSON.stringify(data));
+                    this.errorMessage = '';
+
+                    // Almacenar los datos del yapeo en localStorage
+                    localStorage.setItem('monto', this.monto);
+                    localStorage.setItem('nombreUsuario', this.nombreUsuario);
+                    localStorage.setItem('nombreContacto', this.nombreContacto);
+                    localStorage.setItem('numero', this.numero);
+                    localStorage.setItem('fecha', new Date().toLocaleString());
+                    localStorage.setItem('nroOperacion', data.id); // Asumiendo que la API devuelve el número de operación
+
+                    // Redirigir a la página de confirmación
+                    window.location.href = '/Confirmacionyape';
+                } catch (error) {
+                    this.errorMessage = 'Error al realizar el yapeo: ' + error.message;
+                }
+            }
+        }
+    });
+</script>

@@ -1,0 +1,247 @@
+﻿@page
+@model Web_Vue.Pages.ConfirmacionServicioModel
+@{
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yape - Confirmación de Servicio</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .phone-container {
+            max-width: 375px;
+            margin: 20px auto;
+            background-color: #8e44ad;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 30px;
+            background-color: #f0f0f0;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        .content {
+            padding-top: 40px;
+            position: relative;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 80px;
+        }
+        .confirmation-card {
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .confirmation-card::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 5px,
+                #8e44ad 5px,
+                #8e44ad 10px
+            );
+        }
+        h1 {
+            color: #8e44ad;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .amount {
+            font-size: 48px;
+            font-weight: bold;
+            color: #8e44ad;
+            margin-bottom: 20px;
+        }
+        .details p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .other-services {
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .service-icons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .service-icons img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+        }
+        .yapear-button {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 10px;
+        }
+        .nav-item {
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #00ffff;
+            animation: fall 3s linear infinite;
+        }
+         
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="phone-container">
+        <div class="notch"></div>
+        <div class="content">
+            <div class="logo">
+                <img src="/api/placeholder/80/80" alt="Yape logo">
+            </div>
+            <div class="confirmation-card">
+                <h1>¡Yapeaste el servicio!</h1>
+                <div class="amount">S/{{ monto }}</div>
+                <div class="details">
+                    <p><strong>{{ empresa }}</strong></p>
+                    <p>{{ fecha }}</p>
+                    <p>Servicio: {{ servicio }}</p>
+                    <p>Código de cliente: {{ codigoCliente }}</p>
+                    <p>Nro. de operación: {{ nroOperacion }}</p>
+                </div>
+            </div>
+            <div class="other-services">
+                <p>¡También puedes yapear otros servicios!</p>
+                <div class="service-icons">
+                    <img src="/api/placeholder/40/40" alt="Movistar">
+                    <img src="/api/placeholder/40/40" alt="Entel">
+                    <img src="/api/placeholder/40/40" alt="Sedapal">
+                    <img src="/api/placeholder/40/40" alt="Calidda">
+                    <img src="/api/placeholder/40/40" alt="Eska">
+                </div>
+                <button class="yapear-button">YAPEAR OTRO SERVICIO →</button>
+            </div>
+            <div class="bottom-nav">
+                <div class="nav-item" v-on:click="compartir">
+                    <div class="nav-icon">🔗</div>
+                    Compartir
+                </div>
+                <div class="nav-item" v-on:click="irInicio">
+                    <div class="nav-icon">🏠</div>
+                    Ir a inicio
+                </div>
+                <div class="nav-item">
+                    <div class="nav-icon">📄</div>
+                    Yapear otro<br>servicio
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                monto: '',
+                empresa: '',
+                fecha: '',
+                servicio: '',
+                codigoCliente: '',
+                nroOperacion: '',
+                userId: '',
+                nombreUsuario: '',
+                token: ''
+            },
+            created() {
+                this.cargarDatos();
+            },
+            methods: {
+                cargarDatos() {
+                    const pago = JSON.parse(sessionStorage.getItem('pago'));
+                    if (pago) {
+                        this.monto = pago.montoAPagar;
+                        this.empresa = sessionStorage.getItem('nombreEmpresa');
+                        this.fecha = new Date().toLocaleDateString();
+                        this.servicio = 'Servicio de ejemplo'; // Ajusta según sea necesario
+                        this.codigoCliente = pago.idFacturaPago;
+                        this.nroOperacion = Math.floor(Math.random() * 1000000); // Generar un número de operación aleatorio
+                        this.userId = pago.userId;
+                        this.nombreUsuario = pago.nombreUsuario;
+                        this.token = pago.token;
+                    } else {
+                        alert('No hay datos de pago disponibles.');
+                        window.location.href = '/';
+                    }
+                },
+                irInicio() {
+                    // Guardar datos en sessionStorage para el menú
+                    sessionStorage.setItem('datosUsuario', JSON.stringify({ userId: this.userId, nombreUsuario: this.nombreUsuario, token: this.token }));
+                    window.location.href = '/Menu';
+                },
+                compartir() {
+                    // Lógica para compartir
+                }
+            }
+        });
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+            confetti.style.backgroundColor = ['#00ffff', '#ff00ff', '#ffff00', '#00ff00'][Math.floor(Math.random() * 4)];
+            document.querySelector('.content').appendChild(confetti);
+            setTimeout(() => confetti.remove(), 5000);
+        }
+        setInterval(createConfetti, 300);
+    </script>
+</body>
+</html>
